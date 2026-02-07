@@ -10,6 +10,7 @@ enum Constants {
     enum UserDefaultsKeys {
         static let lastExportTime = "lastExportTime"
         static let firstRecordingTime = "firstRecordingTime"
+        static let lastRecordingTime = "lastRecordingTime"
     }
 
     static let csvFileNamePrefix = "motion_data_export"

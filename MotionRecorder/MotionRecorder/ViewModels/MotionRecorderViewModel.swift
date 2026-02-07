@@ -47,6 +47,11 @@ final class MotionRecorderViewModel {
             return
         }
 
+        if firstRecordingTime == nil {
+            firstRecordingTime = Date()
+            UserDefaults.standard.set(firstRecordingTime?.timeIntervalSinceReferenceDate, forKey: Constants.UserDefaultsKeys.firstRecordingTime)
+        }
+
         motionService.startRecording { [weak self] dataPoint in
             self?.handleMotionData(dataPoint)
         }
@@ -67,7 +72,7 @@ final class MotionRecorderViewModel {
     }
 
     func exportData() async throws -> URL {
-        let sinceTimestamp = lastExportTime?.timeIntervalSinceReferenceDate ?? 0
+        let sinceTimestamp = UserDefaults.standard.double(forKey: Constants.UserDefaultsKeys.lastExportTime)
         let dataPoints = try await databaseService.fetchDataSince(sinceTimestamp)
 
         guard !dataPoints.isEmpty else {
@@ -76,20 +81,25 @@ final class MotionRecorderViewModel {
 
         let fileURL = try await exportService.exportToCSV(dataPoints: dataPoints)
 
+        if let lastDataPoint = dataPoints.last {
+            UserDefaults.standard.set(lastDataPoint.timestamp, forKey: Constants.UserDefaultsKeys.lastExportTime)
+        }
+
         lastExportTime = Date()
-        UserDefaults.standard.set(lastExportTime?.timeIntervalSinceReferenceDate, forKey: Constants.UserDefaultsKeys.lastExportTime)
 
         return fileURL
     }
 
     func refreshStats() async {
         do {
-            firstRecordingTime = try await databaseService.getFirstRecordingTime()
-            lastRecordingTime = try await databaseService.getLastRecordingTime()
             recordCount = try await databaseService.getRecordCount()
 
-            if let savedExportTime = UserDefaults.standard.object(forKey: Constants.UserDefaultsKeys.lastExportTime) as? TimeInterval {
-                lastExportTime = Date(timeIntervalSinceReferenceDate: savedExportTime)
+            if let firstTime = UserDefaults.standard.object(forKey: Constants.UserDefaultsKeys.firstRecordingTime) as? TimeInterval {
+                firstRecordingTime = Date(timeIntervalSinceReferenceDate: firstTime)
+            }
+
+            if let lastTime = UserDefaults.standard.object(forKey: Constants.UserDefaultsKeys.lastRecordingTime) as? TimeInterval {
+                lastRecordingTime = Date(timeIntervalSinceReferenceDate: lastTime)
             }
         } catch {
             errorMessage = "Failed to refresh stats: \(error.localizedDescription)"
@@ -124,10 +134,8 @@ final class MotionRecorderViewModel {
         do {
             try await databaseService.insertBatch(pointsToInsert)
 
-            if let lastPoint = pointsToInsert.last {
-                lastRecordingTime = lastPoint.date
-            }
-
+            lastRecordingTime = Date()
+            UserDefaults.standard.set(lastRecordingTime?.timeIntervalSinceReferenceDate, forKey: Constants.UserDefaultsKeys.lastRecordingTime)
             recordCount += pointsToInsert.count
         } catch {
             errorMessage = "Failed to save data: \(error.localizedDescription)"

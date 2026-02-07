@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var viewModel: MotionRecorderViewModel
     @State private var exportFileURL: URL?
-    @State private var showingExportSheet = false
+    @State private var showingShareSheet = false
     @State private var showingError = false
 
     init(viewModel: MotionRecorderViewModel? = nil) {
@@ -32,7 +32,7 @@ struct ContentView: View {
             .task {
                 await viewModel.initialize()
             }
-            .sheet(isPresented: $showingExportSheet) {
+            .sheet(isPresented: $showingShareSheet) {
                 if let url = exportFileURL {
                     ShareSheet(items: [url])
                 }
@@ -129,122 +129,36 @@ struct ContentView: View {
     }
 
     private var exportButton: some View {
-        VStack {
-            Button(action: {
-                Task {
-                    do {
-                        let url = try await viewModel.exportData()
-                        exportFileURL = url
-                        showingExportSheet = true
-                        await viewModel.refreshStats()
-                    } catch {
-                        viewModel.errorMessage = error.localizedDescription
-                    }
+        Button(action: {
+            Task {
+                do {
+                    let url = try await viewModel.exportData()
+                    exportFileURL = url
+                    showingShareSheet = true
+                    await viewModel.refreshStats()
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
                 }
-            }) {
-                HStack {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title2)
-
-                    Text("Export to CSV")
-                        .font(.headline)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.green)
-                .foregroundStyle(.white)
-                .cornerRadius(12)
             }
-            .disabled(viewModel.recordCount == 0)
-            .opacity(viewModel.recordCount == 0 ? 0.5 : 1.0)
+        }) {
+            HStack {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.title2)
+
+                Text("Export to CSV")
+                    .font(.headline)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.green)
+            .foregroundStyle(.white)
+            .cornerRadius(12)
         }
+        .disabled(viewModel.recordCount == 0)
+        .opacity(viewModel.recordCount == 0 ? 0.5 : 1.0)
     }
 }
-
 
 #Preview {
     ContentView()
 }
-
-/*
- ALTERNATIVA CON SHARELINK (iOS 16+)
-
- Para usar ShareLink en vez de UIActivityViewController:
-
- 1. Eliminar ShareSheet.swift (ya no se necesita)
-
- 2. Eliminar del ContentView:
-    - @State private var showingExportSheet = false
-    - El .sheet(isPresented: $showingExportSheet) modifier
-
- 3. Reemplazar exportButton con:
-
-    private var exportButton: some View {
-        Group {
-            if let url = exportFileURL {
-                ShareLink(item: url, preview: SharePreview("Motion Data Export", image: Image(systemName: "square.and.arrow.up"))) {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.title2)
-
-                        Text("Export to CSV")
-                            .font(.headline)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundStyle(.white)
-                    .cornerRadius(12)
-                }
-                .disabled(viewModel.recordCount == 0)
-                .opacity(viewModel.recordCount == 0 ? 0.5 : 1.0)
-                .task(id: url) {
-                    await viewModel.refreshStats()
-                }
-            } else {
-                Button(action: {
-                    Task {
-                        do {
-                            let url = try await viewModel.exportData()
-                            exportFileURL = url
-                        } catch {
-                            viewModel.errorMessage = error.localizedDescription
-                        }
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.title2)
-
-                        Text("Export to CSV")
-                            .font(.headline)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundStyle(.white)
-                    .cornerRadius(12)
-                }
-                .disabled(viewModel.recordCount == 0)
-                .opacity(viewModel.recordCount == 0 ? 0.5 : 1.0)
-            }
-        }
-    }
-
- COMPARACIÓN:
-
- UIActivityViewController (actual):
- ✅ Compatible iOS 6+
- ✅ Más control sobre presentación
- ✅ Enseña interoperabilidad UIKit/SwiftUI
- ❌ Más código (necesita bridge)
-
- ShareLink:
- ✅ Nativo SwiftUI
- ✅ Menos código
- ✅ Más declarativo
- ❌ Requiere iOS 16+
- ❌ Menos control
-
- Ambos muestran el mismo "share sheet" nativo de iOS al final.
- */
