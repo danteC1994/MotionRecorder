@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		816FF4CA2F37D3A10095D9DC /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 816FF4C92F37D3A10095D9DC /* GRDB */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		816FF4972F37CD1B0095D9DC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				816FF4CA2F37D3A10095D9DC /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = MotionRecorder;
 			packageProductDependencies = (
+				816FF4C92F37D3A10095D9DC /* GRDB */,
 			);
 			productName = MotionRecorder;
 			productReference = 816FF4892F37CD190095D9DC /* MotionRecorder.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 816FF4802F37CD190095D9DC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				816FF4C82F37D3A10095D9DC /* XCRemoteSwiftPackageReference "GRDB" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 816FF48A2F37CD190095D9DC /* Products */;
 			projectDirPath = "";
@@ -570,6 +579,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		816FF4C82F37D3A10095D9DC /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		816FF4C92F37D3A10095D9DC /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 816FF4C82F37D3A10095D9DC /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 816FF4812F37CD190095D9DC /* Project object */;
 }
